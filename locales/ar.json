@@ -1,0 +1,18 @@
+{
+    "home": {
+        "title": "خدمات نقطة البيع",
+        "description": "",
+
+        "cards": {
+            "saleInovice": "فاتورة المبيعات",
+            "saleReturn": "مرتجع المبيعات"
+        }
+    },
+    "header": {
+        "invoice-sales": "فاتورة مبيعات"
+    },
+    
+    "loading": {
+        "items": "جاري تحميل الأصناف"
+    }
+}

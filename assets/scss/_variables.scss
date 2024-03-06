@@ -1,0 +1,59 @@
+
+$primary-normal-700: #51ADFC;
+$primary-800: #3CA3FB;
+$primary-disabled: #A8D6FD;
+$Green-normal-700: #33EF72;
+$red-normal-700: #FA5656;
+$yellow-normal-700: #FFCD8A;
+$Neutral-normal-100: #EEE;
+$Neutral-300: #B8B8B8;
+$Neutral-400: #A0A0A0;
+$Neutral-700: #585858;
+$Neutral-600: #707070;
+$Neutral-50: #F7F7F7;
+$white: #fff;
+$paragraph: #5F6368;
+$Success-100: #E2FDEB;
+$Success-800: #16ED5E;
+$Error-100: #fde2e2;
+$Error-800: #ed1616;
+// Hover 
+$Primary-hover-900: #2699FB;
+$Neutral-hover-200: #CFCFCF;
+$Green-hover-900: #10D451;
+$Red-hover-900: #F92626;
+$Yellow-hover-900: #FFBE69;
+$Neutral-900: #292929;
+// ======== Backgrounds ============
+// Body Background 
+$background-neutral-200: #CFCFCF;
+$Neutral-50: #F7F7F7;
+//Header Background
+$Neutral-800: #414141;
+$background: #F8F8F8;
+$Primary-background-100: #D4EBFE;
+
+$Primary-background-50: #E9F5FF;
+// Status Background ===========
+$error-background: #FEE7E7;
+$waring-background: #FFF8EE;
+
+$Overlay-background: rgba(0, 0, 0, 0.2);
+// ========== Borders ============== 
+// Borders 
+$border-disable-readonly: 1px solid $Neutral-hover-200;
+// Border Radius 
+$border-radius-4: 4px;
+$border-radius-6: 6px;
+$border-radius-8: 8px;
+$border-radius-12: 12px;
+
+// Border Inputs 
+$Normal-input-border: 1px solid $Neutral-hover-200;
+$focused-input-border: 1px solid $Neutral-600;
+
+// Button Border 
+$border-button: 1px solid $Neutral-normal-100;
+// Shadow 
+$boxShadow:  0px 32px 64px -12px rgba(45, 54, 67, 0.14);
+$boxShadow-menu: 0px 1px 2px 0px rgba(45, 54, 67, 0.05);
