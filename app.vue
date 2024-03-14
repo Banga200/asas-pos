@@ -30,7 +30,6 @@ const {snack} = useSnackBar();
 <template>
   <NuxtLayout>
     <div id="snackbar" :class="[snack.color,{'show': snack.message,}]" v-if="snack">{{ snack.message }}</div>
-    <NuxtLoadingIndicator></NuxtLoadingIndicator>
     <NuxtPage/>
   </NuxtLayout>
 </template>
