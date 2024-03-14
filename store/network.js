@@ -11,17 +11,16 @@ export const useNetworkStore = defineStore("network", () => {
     casherPort: 9100
   })
   async function GetIpAddress() {
-    success.value = false
-    try {
-      const data  = await $fetch("/api/getIP");
-      if (data) {
-        IP.value  = data
-        success.value = true;
-        console.log(data)
-      }
-    } catch (error) {
-      console.log(error);
-    }
+    // success.value = false
+    // try {
+    //   const data  = await $fetch("/api/getIP");
+    //   if (data) {
+    //     IP.value  = data
+    //     success.value = true;
+    //   }
+    // } catch (error) {
+    //   console.log(error);
+    // }
   }
   return {
     IP,

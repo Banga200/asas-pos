@@ -6,7 +6,6 @@ export const useCompanyStore = defineStore("company", () => {
 
   // Actions
   async function CheckCode(code) {
-    console.log(code)
     try {
       const response = await useAPIFetch("/Company/CheckCode", {
         headers: {

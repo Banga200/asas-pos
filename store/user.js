@@ -72,7 +72,6 @@ export const useUserStore = defineStore("user", () => {
           }
         }
         if (user.value.Code === 400) {
-          console.log("USer Login")
           handelError(user.value)
         }
         else {
@@ -130,10 +129,8 @@ export const useUserStore = defineStore("user", () => {
           router.push("/user-check/Login");
           // Do something
         } else {
-          console.log(res)
         }
       }).catch(error => {console.log(error.message)});
-      console.log(response)
     } catch (error) {
       console.log(error);
     }

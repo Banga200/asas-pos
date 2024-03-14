@@ -35,11 +35,11 @@ const component = shallowRef({
           :prappendIcon="ChangeBranchIcon"
           :link="'/settings/choose-branch'"
         />
-        <ItemSide
+        <!-- <ItemSide
           :text="'الضريبة'"
           :prappendIcon="TaxIcon"
           :link="'/settings/tax'"
-        />
+        /> -->
         <ItemSide
           :text="'طابعة الشبكة'"
           :prappendIcon="PrintIcon"

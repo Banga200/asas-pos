@@ -12,6 +12,7 @@ export const useSalesStore = defineStore("Sales", () => {
   // states
   const Sales = ref(null);
   const PrintInvoice = ref(null);
+  const SalesDetails = ref(null)
   const success = ref(false);
   const loading = ref(false);
   // Actions
@@ -22,6 +23,8 @@ export const useSalesStore = defineStore("Sales", () => {
         headers: {
           "Content-Type": "application/json",
           "Access-Control-Allow-Origin": "*",
+          'Access-Control-Allow-Credentials': 'true',
+          "Access-Control-Allow-Headers": '*',
         },
         params: 
         { 
@@ -39,7 +42,30 @@ export const useSalesStore = defineStore("Sales", () => {
       loading.value = false
     }
   }
-
+  // Get Sales Invoice Details 
+  async function GetSalesDetails(id) {
+    loading.value = true
+    try {
+      const sales = await useAPIFetch("/Sales/Details", {
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+        },
+        params: 
+        { 
+          companyCode: companyStore.CompanyCode,
+          GUID: id
+        },
+      });
+      if (sales) {
+        SalesDetails.value = sales.Data;
+        loading.value = false
+      } 
+    } catch (error) {
+      console.log(error)
+      loading.value = false
+    }
+  }
   async function GetInvoiceById(id) {
     loading.value = true
     try {
@@ -66,7 +92,8 @@ export const useSalesStore = defineStore("Sales", () => {
   }
   
   async function SaveNewSaleInvoice(invoice) {
-    loading.value = true
+    loading.value = true;
+    success.value = false;
     try {
       const {data:sale} = await useGlobalFetch("/Sales/save", {
         headers: {
@@ -81,7 +108,6 @@ export const useSalesStore = defineStore("Sales", () => {
         },
         body: JSON.stringify(invoice)
       });
-      console.log(sale.value)
       if(sale.value.Code === 200) {
         if (sale.value.Data.ContinueLogin) {
           successhandle("تم حفظ الفاتورة")
@@ -90,7 +116,6 @@ export const useSalesStore = defineStore("Sales", () => {
         }
         else {
           userStore.LogOut();
-          success.value = true
           errorhandle(sale.value.Message);
           loading.value = false
         }
@@ -108,5 +133,5 @@ export const useSalesStore = defineStore("Sales", () => {
     }
   }
 
-  return {GetAllSales,GetInvoiceById,SaveNewSaleInvoice,success,loading, Sales}
+  return {GetAllSales,GetInvoiceById,GetSalesDetails,SaveNewSaleInvoice,success,SalesDetails,loading, Sales}
 });

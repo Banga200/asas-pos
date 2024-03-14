@@ -8,19 +8,22 @@ import NewInvoiceSalesTable from "~/components/Tables/NewInvoiceSalesTable.vue";
 import { useBranchStore } from "~/store/branch";
 import { useUserStore } from "~/store/user";
 import { useSalesStore } from "~/store/sales";
-import { ref, watch } from "vue";
-import { useRouter } from "vue-router";
+import { ref, watch, onMounted } from "vue";
+import { useRouter, useRoute } from "vue-router";
 const router = useRouter();
-const localePath = useLocalePath()
+const route = useRoute();
+const localePath = useLocalePath();
 const branchStore = useBranchStore();
 const userStore = useUserStore();
 const saleStore = useSalesStore();
 const { BranchID } = storeToRefs(branchStore);
 const { CurrentUser } = storeToRefs(userStore);
+const { SalesDetails } = storeToRefs(saleStore);
 let userid = 0;
 if (process.client) {
   userid = JSON.parse(localStorage.getItem("user"));
 }
+
 const { success } = storeToRefs(saleStore);
 definePageMeta({
   layout: "no-header",
@@ -71,22 +74,65 @@ const items = ref([
     VatID: 0,
   },
 ]);
-
+if (process.client) {
+  if (route.params.id) {
+    await saleStore.GetSalesDetails(route.params.id);
+    if (SalesDetails.value) {
+      items.value = [];
+      SalesDetails.value.forEach((item, i) => {
+        items.value.push({
+          name: item.ItemNameA,
+          unitName: item.UnitNameA,
+          LineNo: 0,
+          ItemID: item.CategoryID,
+          UnitID: item.UnitID,
+          Quantity: item.Quantity,
+          Price: item.Price,
+          Total: 0,
+          Discount: item.Discount,
+          Tax: item.Tax,
+          Net: item.Net,
+          ActualQuantity: item.ActualQty,
+          VatID: 0,
+        });
+      });
+      increseItem(SalesDetails.value.length);
+    }
+  }
+}
 function increseItem(index) {
-  if (items.value.length - 1 === index) {
-    items.value.push({
-      LineNo: 0,
-      ItemID: 0,
-      UnitID: 0,
-      Quantity: 0,
-      Price: 0,
-      Total: 0,
-      Discount: 0,
-      Tax: 0,
-      Net: 0,
-      ActualQuantity: 0,
-      VatID: 0,
-    });
+  if (items.value.length - 1 === index || items.value.length === index) {
+    if (route.params.id) {
+      items.value.push({
+        name: "",
+        unitName: "",
+        LineNo: 0,
+        ItemID: 0,
+        UnitID: 0,
+        Quantity: 0,
+        Price: 0,
+        Total: 0,
+        Discount: 0,
+        Tax: 0,
+        Net: 0,
+        ActualQuantity: 0,
+        VatID: 0,
+      });
+    } else {
+      items.value.push({
+        LineNo: 0,
+        ItemID: 0,
+        UnitID: 0,
+        Quantity: 0,
+        Price: 0,
+        Total: 0,
+        Discount: 0,
+        Tax: 0,
+        Net: 0,
+        ActualQuantity: 0,
+        VatID: 0,
+      });
+    }
   }
 }
 // معلومات العميل
@@ -113,40 +159,41 @@ function setCustomerDetails(customer) {
 }
 function setQuantityItem(value, index) {
   items.value[index].Quantity = parseInt(value);
-  items.value[index].ActualQuantity = value * items.value[index].ActualQuantity
+  items.value[index].ActualQuantity = value * items.value[index].ActualQuantity;
 }
 // الكمية والسعر الخاصة بالوحدة المختارة
 function setUnitItem(unit, index) {
-  items.value[index].ActualQuantity = unit.ActualQty
+  items.value[index].ActualQuantity = unit.ActualQty;
   items.value[index].Price = unit.SalePrice;
-  items.value[index].Quantity = items.value[index].Quantity === 0 ? 1: items.value[index].Quantity ;
+  items.value[index].Quantity =
+    items.value[index].Quantity === 0 ? 1 : items.value[index].Quantity;
   calculateNet(index);
 }
 // مجموع الصنف (السعر * الكمية)
 function setTotalItem(total, index) {
-  let totalItem = 0
+  let totalItem = 0;
   items.value[index].Total = total;
-  items.value.forEach(item => {
-    totalItem += item.Total
-  })
-  
+  items.value.forEach((item) => {
+    totalItem += item.Total;
+  });
+
   calculateNet(index);
-  NewInvoice.value.Total = parseFloat(totalItem.toFixed(2))
+  NewInvoice.value.Total = parseFloat(totalItem.toFixed(2));
 }
 // الضريبة مع VatID
 function setVatValueItem(VatValue, vatId, index) {
   items.value[index].Tax = parseFloat(VatValue);
   items.value[index].VatID = vatId;
   // calculateNet(index);
-  calcTotalTax()
+  calcTotalTax();
 }
-// حساب مجموع الضريبة المضافة 
+// حساب مجموع الضريبة المضافة
 function calcTotalTax() {
-  let total = 0
-  items.value.forEach(item => {
+  let total = 0;
+  items.value.forEach((item) => {
     total += item.Tax;
-  })
-  NewInvoice.value.TotalTax = parseFloat(total.toFixed(2))
+  });
+  NewInvoice.value.TotalTax = parseFloat(total.toFixed(2));
 }
 // في حالة يتم تغير الضريبة في الصف يتم استدعاء هذه
 function setTaxItem(value, index) {
@@ -154,27 +201,44 @@ function setTaxItem(value, index) {
   calculateNet(index);
 }
 // التخفيض (الحسم)
-function setDiscountItem(value, index) {
-  items.value[index].Discount = value;
-  calculateNet(index);
+function setDiscountItem(value, index, vatValue) {
+  let discount = 0;
+  if (value.includes("%")) {
+    discount = parseInt(value.split("%")[0]);
+    let calcDiscount = (discount / 100) * items.value[index].Total;
+    items.value[index].Discount = parseFloat(
+      useCalculateDiscount(
+        calcDiscount,
+        items.value[index].Quantity,
+        items.value[index].Total,
+        items.value[index].Price
+      ).toFixed(2)
+    );
+  } else {
+    items.value[index].Discount = parseFloat(
+      useCalculateDiscount(
+        value,
+        items.value[index].Quantity,
+        items.value[index].Total,
+        items.value[index].Price
+      ).toFixed(2)
+    );
+  }
+  let beforeTax = items.value[index].Total - items.value[index].Discount;
+  let tax = beforeTax * (vatValue / 100);
+  items.value[index].Tax = parseFloat(tax.toFixed(2));
+  items.value[index].Net = parseFloat((beforeTax + tax).toFixed(2));
+
+  // calculateNet(index);
 }
 // حساب الاجمالي لكل صنف
 function calculateNet(index) {
-  const total = items.value[index].Total;
+  let total = items.value[index].Total;
   const discount = items.value[index].Discount;
   const tax = parseFloat(items.value[index].Tax);
   // الاجمالي
   const net = total + tax;
-  if (net !== 0) {
-    if (discount.toString().includes("%")) {
-      const calcDiscount = ((parseFloat(discount) / 100) * net).toFixed(2);
-      items.value[index].Net = parseFloat((net - calcDiscount).toFixed(2));
-    } else {
-      items.value[index].Net = parseFloat((net - discount).toFixed(2));
-    }
-  } else {
-    items.value[index].Net = parseFloat(net.toFixed(1));
-  }
+  items.value[index].Net = parseFloat((total + tax).toFixed(1));
 }
 // حساب قيمة الفاتورة كامل جميع الاصناف
 const InvoiceNet = computed(() => {
@@ -187,30 +251,37 @@ const InvoiceNet = computed(() => {
 });
 // حذف صف معين
 function removeItem(index) {
-  if (items.value.length !== 1 && items.value[index].ItemID !== 0) {
+  if (items.value.length !== 1 && items.value[index].Price) {
     items.value.splice(index, 1);
   }
 }
 function setLineNoItem(index) {
-  items.value[index].LineNo = index + 1
+  items.value[index].LineNo = index + 1;
 }
+// Save Sales Invoice
 async function saveInvoice() {
   if (NewInvoice.value.Details.length === 0) {
-    for (let index = 0; index < items.value.length - 1; index++) {
-      const element = items.value[index];
-      NewInvoice.value.Details.push(element);
+    if (NewInvoice.value.Type === 0 && NewInvoice.value.CustomerID === 0) {
+      alert('نوع الفاتورة اجل الرجاء اختيار عميل')
+    } else {
+      for (let index = 0; index < items.value.length - 1; index++) {
+        const element = items.value[index];
+        delete element.name;
+        delete element.unitName;
+        NewInvoice.value.Details.push(element);
+        await saleStore.SaveNewSaleInvoice(NewInvoice.value);
+      }
     }
-    await saleStore.SaveNewSaleInvoice(NewInvoice.value);
+
     if (success.value) {
       NewInvoice.value.TotalTax = 0;
       NewInvoice.value.Total = 0;
       NewInvoice.value.Details = [];
       items.value = [];
       increseItem(-1);
-      router.push('/invoice-sales')
+      router.push("/invoice-sales");
     }
-  }
-  else {
+  } else {
     await saleStore.SaveNewSaleInvoice(NewInvoice.value);
   }
 }
@@ -238,9 +309,9 @@ async function saveInvoice() {
       </div>
       <!-- Invoice Head -->
       <InvoiceHeadDetails
-          v-model:invoice="NewInvoice"
-          @setItem="setCustomerDetails"
-        />
+        v-model:invoice="NewInvoice"
+        @setItem="setCustomerDetails"
+      />
       <!-- Invoice Table fields  -->
       <div class="table-container">
         <NewInvoiceSalesTable
@@ -254,13 +325,15 @@ async function saveInvoice() {
           @setTax="setTaxItem"
           @setLineNo="setLineNoItem"
           @removeItem="removeItem"
-          @setQuantity="setQuantityItem"/>
+          @setQuantity="setQuantityItem"
+        />
       </div>
       <!-- Invoice Footer  -->
+
       <InvoiceFooterDetails
         :total="InvoiceNet"
         v-model:input="NewInvoice.Net"
-        v-model:totalTax = "NewInvoice.TotalTax"
+        v-model:totalTax="NewInvoice.TotalTax"
         v-model:totalBefoeTax="NewInvoice.Total"
       />
     </div>

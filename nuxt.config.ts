@@ -12,7 +12,14 @@ export default defineNuxtConfig({
   pinia: {
     storesDirs: ['./store/**']
   },
-  
+  nitro: {
+    devProxy: {
+      '/*': {
+        target: 'http://pos.asaspc.net', // Replace with your API URL
+        changeOrigin: true, // Optional, but recommended for CORS handling
+      },
+    },
+  },
   app:{
     
     head: {

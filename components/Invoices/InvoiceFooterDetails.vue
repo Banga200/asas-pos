@@ -43,8 +43,8 @@ const totalBefoeTax = defineModel('totalBefoeTax');
             </div>
             <div class="sheet">
                 <div class="row">
-                    <TextInput :readOnly="true" v-model:input="totalTax" :lable="'ضريبة القيمة المضافة'"/>
-                    <TextInput :readOnly="true" v-model:input="totalBefoeTax" :lable="'إجمالي قبل الضريبة'"/>
+                    <TextInput :readOnly="true" :value="totalTax" :lable="'ضريبة القيمة المضافة'"/>
+                    <TextInput :readOnly="true" :value="totalBefoeTax" :lable="'إجمالي قبل الضريبة'"/>
                 </div>
                 <div class="row">
                     <TextInput :readOnly="true" :lable="'قيمة الفاتورة'" v-model:input="input" :clear="false" :fullWidth="true" :background="'background'" />

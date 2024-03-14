@@ -4,7 +4,7 @@ const props = defineProps(['lable', 'fText', 'lText','value' ]);
 const type = defineModel('type');
 const emit = defineEmits(['setTypeValue'])
 const value = ref(true);
-
+emit('setTypeValue', value ? 1 : 0)
 function toggle() {
     value.value = !value.value 
     if (value.value) {

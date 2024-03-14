@@ -17,9 +17,13 @@ const props = defineProps([
   'clear'
 ]);
 const showClose = ref(false);
-if (props.value) {
-  input.value = props.value
-}
+
+watch(() => props.value, (newValue) => {
+  if (newValue) {
+    input.value = newValue;
+    nextTick();
+  }
+})
 watch(input, (value) => {
   if (value) {
     showClose.value = true;

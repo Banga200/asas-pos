@@ -6,6 +6,8 @@ import CloseIcon from "../Icons/Close.vue";
 import Mark from "../Icons/Mark.vue";
 import { useItemsStore } from "~/store/items";
 import { useCompanyStore } from "~/store/company";
+import { useRoute } from "vue-router";
+const route = useRoute();
 const { locale } = useI18n();
 const companyStore = useCompanyStore();
 const itemsStore = useItemsStore();
@@ -42,11 +44,23 @@ const comboboxList = ref("");
 if (props.value) {
   input.value = props.value;
 }
+onMounted(() => {
+  if (route.params.id) {
+    if (props.itemID > 0) {
+      gettUnit(props.itemID)
+    }
+  }
+})
 
 watch(
   () => props.itemID,
-  async (value) => {
-    if (props.itemID) {
+  async (itemId) => {
+    if (itemId) {
+      gettUnit(itemId);
+    }
+  });
+async function gettUnit(id) {
+  if (id) {
       try {
         const units = await useAPIFetch("/items/units", {
           headers: {
@@ -55,7 +69,7 @@ watch(
           },
           params: {
             companyCode: companyStore.CompanyCode,
-            id: value,
+            id: id,
           },
         });
         if (units.Code === 200) {
@@ -70,13 +84,13 @@ watch(
       }
     }
   }
-);
+
 const activeItem = ref(null);
 let observer = null;
 onMounted(() => {
   window.addEventListener("click", () => {
     showDropMenu.value = false;
-  });
+  }, true);
   observer = new IntersectionObserver(
     (entity) => {
       if (entity[0].isIntersecting) {
@@ -101,6 +115,9 @@ function setInput(value) {
 const filterItems = computed(() => {
   if (Items.value.length > 0) {
     return Items.value.filter((item) => {
+      if (!input.value) {
+        return item.ItemNameA.includes('');
+      }
       return item.ItemNameA.includes(input.value);
     });
   }
@@ -131,7 +148,7 @@ watch(
 // }
 async function setItemValue(value, id, indexItem) {
   input.value = value;
-  selectedItemID.value = id;
+  selectedItemID.value = id || 0;
   showDropMenu.value = false;
   emit("increseField", props.index);
 
@@ -140,7 +157,7 @@ async function setItemValue(value, id, indexItem) {
 }
 function setMenuUnitValue(value, id) {
   input.value = value;
-  selectedID.value = id;
+  selectedID.value = id || 0;
   showDropMenu.value = false;
   emit(
     "selectedUnit",

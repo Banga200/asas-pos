@@ -9,7 +9,6 @@ export const useBranchStore = defineStore('branch', () => {
     const BranchID = ref(null)
     // Actions 
     async function GetAllBranches() {
-      console.log(userStore.CurrentUser.UserId)
         try {
             const branches = await useAPIFetch("/Branches/all", {
               headers: {

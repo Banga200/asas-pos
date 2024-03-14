@@ -43,7 +43,7 @@ function getDownload(id) {
         <td>{{ row.fDate }}</td>
         <td class="bold">{{ row.Total.toFixed(2) }}</td>
         <td class="row operations">
-          <span class="table-icon top" data-tooltip="تكرار الفاتورة" @click="$router.push(`/invoice-sales/repeat-invoice/${row.fGUID}`)"><RepeatIcon /></span>
+          <span class="table-icon top" data-tooltip="تكرار الفاتورة" @click="$router.push(`/invoice-sales/new-invoice/${row.fGUID}`)"><RepeatIcon /></span>
           <div>
             <PrintMenu @printCasher="printCasher(row.fGUID)" @printInvoiceSales="printInvoiceSales(row.fGUID)" @download="getDownload(row.fGUID)" :invoiceID="row.fGUID"/>
           </div>
